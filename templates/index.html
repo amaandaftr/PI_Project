@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Deteksi Plagiarisme - PI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Skema Warna Cream & Cokelat Tua */
+        :root {
+            --bg-cream: #F5F5DC;
+            --card-cream: #FFFDE7;
+            --dark-brown: #3E2723;
+            --medium-brown: #5D4037;
+            --light-brown: #D7CCC8;
+            --text-main: #2D1B18;
+        }
+
+        body { 
+            background-color: var(--bg-cream); 
+            color: var(--text-main);
+            font-family: 'Crimson Text', serif;
+            font-size: 1.1rem;
+        }
+
+        h1, h2, h3, h4, h5, .navbar-brand {
+            font-family: 'Playfair Display', serif;
+            color: var(--dark-brown) !important;
+        }
+
+        /* Navbar Custom */
+        .navbar {
+            background-color: var(--dark-brown) !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .navbar-brand, .nav-link {
+            color: var(--bg-cream) !important;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: #FFECB3 !important; /* Warna emas muda saat aktif */
+            border-bottom: 2px solid #FFECB3;
+        }
+
+        /* Container & Cards */
+        .hero-section { 
+            background: var(--card-cream); 
+            padding: 40px; 
+            border-radius: 15px; 
+            border: 1px solid var(--light-brown);
+            box-shadow: 0 10px 30px rgba(62, 39, 35, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: var(--card-cream);
+            border: 1px solid var(--light-brown);
+            border-radius: 12px;
+        }
+
+        /* Tombol Cokelat */
+        .btn-primary {
+            background-color: var(--medium-brown) !important;
+            border-color: var(--dark-brown) !important;
+            color: var(--bg-cream) !important;
+            padding: 12px 30px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--dark-brown) !important;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background-color: #4E342E !important;
+            border-color: #3E2723 !important;
+        }
+
+        /* Tabel & Badge */
+        .table {
+            color: var(--text-main);
+            border-color: var(--light-brown);
+        }
+
+        .table thead {
+            background-color: var(--light-brown);
+        }
+
+        .badge-custom {
+            font-size: 0.9rem;
+            padding: 8px 12px;
+            border-radius: 5px;
+        }
+
+        .footer-text {
+            color: var(--medium-brown);
+            margin-top: 50px;
+            padding-bottom: 30px;
+        }
+
+        /* Form Input Styling */
+        .form-control {
+            background-color: #FFFFFF;
+            border: 1px solid var(--light-brown);
+        }
+
+        .form-control:focus {
+            border-color: var(--medium-brown);
+            box-shadow: 0 0 0 0.25rem rgba(93, 64, 55, 0.25);
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark mb-4">
+    <div class="container">
+        <a class="navbar-brand" href="/">PLAGIARISM CHECKER</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link {% if page=='home' %}active{% endif %}" href="/">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if page=='about' %}active{% endif %}" href="/about">About</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    {% if page == 'home' %}
+    <div class="hero-section text-center">
+        <h2 class="mb-2">Analisis Tugas Mahasiswa</h2>
+        <p class="text-muted mb-4">Bandingkan file tugas mahasiswa menggunakan Plagiarism Checker.</p>
+        
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Pilih File (PDF, DOCX, TXT, atau ZIP):</label>
+                        <input type="file" name="file_tugas" class="form-control form-control-lg" accept=".pdf,.docx,.txt,.zip" multiple required>
+                        <small class="text-muted">Anda bisa memilih 1 file atau sekaligus mengunggah 1 file ZIP.</small>
+                    </div>
+
+                    <div class="input-group mb-4">
+                        <span class="input-group-text bg-light text-dark">Threshold Minimal (%)</span>
+                        <input type="number" name="threshold" class="form-control text-center" value="25" min="0" max="100">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm">
+                        Mulai Proses Analisis
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    {% elif page == 'result' %}
+    <div class="card shadow-sm mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center bg-white py-3">
+            <h5 class="mb-0 fw-bold">Hasil Perbandingan Antar Dokumen</h5>
+            <a href="/export" class="btn btn-success btn-sm px-3">
+                <i class="bi bi-file-earmark-pdf"></i> Export Laporan Hasil (PDF)
+            </a>
+        </div>
+        <div class="card-body">
+            <p class="small text-muted mb-4">Menampilkan kemiripan di atas <strong>{{ threshold }}%</strong>.</p>
+            
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Dokumen Utama (A)</th>
+                            <th>Dokumen Pembanding (B)</th>
+                            <th class="text-center">Skor Similarity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in hasil %}
+                        <tr>
+                            <td><span class="text-break">{{ item.doc1 }}</span></td>
+                            <td><span class="text-break">{{ item.doc2 }}</span></td>
+                            <td class="text-center">
+                                <span class="badge badge-custom {% if item.skor > 50 %}bg-danger{% elif item.skor > 20 %}bg-warning text-dark{% else %}bg-success{% endif %}">
+                                    {{ item.skor }}%
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if not hasil %}
+            <div class="alert alert-secondary text-center my-4">
+                Tidak ditemukan dokumen dengan tingkat kemiripan di atas {{ threshold }}%.
+            </div>
+            {% endif %}
+
+            <div class="text-center mt-4">
+                <a href="/" class="btn btn-outline-brown btn-sm" style="color: var(--medium-brown); border-color: var(--medium-brown);">
+                    &larr; Kembali ke Upload
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% elif page == 'about' %}
+    <div class="hero-section">
+        <h3 class="mb-4 border-bottom pb-2">Tentang Aplikasi</h3>
+        <p>Aplikasi <strong>Sistem Pencegahan Plagiarisme</strong> ini dikembangkan untuk memfasilitasi pengecekan integritas akademik pada tugas perkuliahan.</p>
+        
+        <h5 class="mt-4">Metodologi yang Digunakan:</h5>
+        <ul class="list-group list-group-flush bg-transparent">
+            <li class="list-group-item bg-transparent border-0 ps-0">
+                <strong>1. Preprocessing (Sastrawi):</strong> Melakukan <em>stemming</em> bahasa Indonesia untuk mengembalikan kata ke bentuk dasarnya.
+            </li>
+            <li class="list-group-item bg-transparent border-0 ps-0">
+                <strong>2. TF-IDF (Term Frequency-Inverse Document Frequency):</strong> Memberikan bobot pada setiap kata berdasarkan frekuensi kemunculannya dalam dokumen.
+            </li>
+            <li class="list-group-item bg-transparent border-0 ps-0">
+                <strong>3. Cosine Similarity:</strong> Menghitung nilai kosinus sudut antara dua vektor dokumen untuk menentukan tingkat kemiripan tekstual.
+            </li>
+        </ul>
+        
+        <div class="mt-5">
+            <a href="/" class="btn btn-primary">Back to Home</a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<footer class="text-center footer-text">
+    <small>&copy; 2026 - Penulisan Ilmiah - Plagiarism Checker</small>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
